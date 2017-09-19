@@ -14,16 +14,16 @@ import org.junit.Test;
 public class UserAgentMRTests {
 
   private MapDriver<LongWritable, Text, Text, LongWritable> mapDriver;
-  private ReduceDriver<Text, LongWritable, NullWritable, Text> reduceDriver;
-  private MapReduceDriver<LongWritable, Text, Text, LongWritable, NullWritable, Text> mrDriver;
+  private ReduceDriver<Text, LongWritable, Text, NullWritable> reduceDriver;
+  private MapReduceDriver<LongWritable, Text, Text, LongWritable, Text, NullWritable> mrDriver;
 
   @Before
   public void setUp() {
     UserAgentMapper mapper = new UserAgentMapper();
     UserAgentReducer reducer = new UserAgentReducer();
     mapDriver = new MapDriver<LongWritable, Text, Text, LongWritable>(mapper);
-    reduceDriver = new ReduceDriver<Text, LongWritable, NullWritable, Text>(reducer);
-    mrDriver = new MapReduceDriver<LongWritable, Text, Text, LongWritable, NullWritable, Text>(mapper, reducer);
+    reduceDriver = new ReduceDriver<Text, LongWritable, Text, NullWritable>(reducer);
+    mrDriver = MapReduceDriver.newMapReduceDriver(mapper, reducer);
   }
 
   @Test
@@ -46,7 +46,7 @@ public class UserAgentMRTests {
     bytes.add(bytes1);
     bytes.add(bytes2);
     reduceDriver.withInput(ip1, bytes);
-    reduceDriver.withOutput(NullWritable.get(), new Text("ip1,15.0,30"));
+    reduceDriver.withOutput(new Text("ip1,15.0,30"), NullWritable.get());
     reduceDriver.runTest();
   }
 
@@ -60,9 +60,14 @@ public class UserAgentMRTests {
     mrDriver.withInput(new LongWritable(), in1);
     mrDriver.withInput(new LongWritable(), in2);
     mrDriver.withInput(new LongWritable(), in3);
-    mrDriver.withOutput(NullWritable.get(), out1);
-    mrDriver.withOutput(NullWritable.get(), out2);
+    mrDriver.withOutput(out1, NullWritable.get());
+    mrDriver.withOutput(out2, NullWritable.get());
     mrDriver.runTest();
+  }
+
+  @Test
+  public void testCounters() {
+
   }
 
 }
